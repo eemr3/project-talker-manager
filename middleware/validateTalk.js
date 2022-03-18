@@ -1,5 +1,6 @@
 const validateTalkObj = (req, res, next) => {
   const { talk } = req.body;
+  // regex validação da data retirada do site: https://www.regextester.com/99555
   const validateDate = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/i;
   if (validateDate.test(talk.watchedAt) === false) {
     return res.status(400)
