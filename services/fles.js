@@ -2,8 +2,9 @@ const fs = require('fs');
 
 const readeFiles = (file) => {
   try {
-    const resultReadFile = fs.readFileSync(file, 'utf8');
-    return JSON.parse(resultReadFile);
+    const resultReadFile = fs.readFileSync(file);
+    const data = JSON.parse(resultReadFile);
+    return data;
   } catch (error) {
     console.log(error);
   }
