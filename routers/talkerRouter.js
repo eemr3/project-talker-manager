@@ -2,7 +2,7 @@ const express = require('express');
 const validateAge = require('../middleware/validateAge');
 const validateName = require('../middleware/validateName');
 const validateTalk = require('../middleware/validateTalk');
-const validateTokne = require('../middleware/validateToken');
+const validateToken = require('../middleware/validateToken');
 const { readeFiles, createFiles } = require('../services/fles');
 
 const HTTP_OK_STATUS = 200;
@@ -16,6 +16,15 @@ router.get('/', (req, res) => {
   return res.status(HTTP_OK_STATUS).json([]);
 });
 
+router.get('/search', validateToken, (req, res) => { 
+  const { searchTerm } = req.query;
+  const dataFile = readeFiles(NAME_FILE);
+  const result = dataFile.filter((item) => item.name.includes(searchTerm));
+  if (!searchTerm) return res.status(200).json(dataFile);
+  if (!result) return res.status(200).json([]);
+  return res.status(200).json(result);
+});
+
 router.get('/:id', (req, res) => {
   const { id } = req.params;
   const dataFile = readeFiles(NAME_FILE);
@@ -24,8 +33,7 @@ router.get('/:id', (req, res) => {
   res.status(HTTP_OK_STATUS).json(result);
 });
 
-// router.use(validateTokne, validateName, validateAge, validateTalk,);
-router.post('/', validateTokne, validateName, validateAge, validateTalk, (req, res) => {
+router.post('/', validateToken, validateName, validateAge, validateTalk, (req, res) => {
   const { name, age, talk, watchedAt, rate } = req.body;
   const talkers = readeFiles(NAME_FILE);
   talkers.push({ id: talkers.length + 1, name, age, talk, watchedAt, rate });
@@ -33,7 +41,7 @@ router.post('/', validateTokne, validateName, validateAge, validateTalk, (req, r
   return res.status(201).json({ id: talkers.length, name, age, talk, watchedAt, rate });
 });
 
-router.put('/:id', validateTokne, validateName, validateAge, validateTalk, (req, res) => {
+router.put('/:id', validateToken, validateName, validateAge, validateTalk, (req, res) => {
   const dataFile = readeFiles(NAME_FILE);
   const { id } = req.params;
   const { name, age, talk } = req.body;
@@ -43,7 +51,7 @@ router.put('/:id', validateTokne, validateName, validateAge, validateTalk, (req,
   return res.status(200).json({ name, age, id: Number(id), talk });
 });
 
-router.delete('/:id', validateTokne, (req, res) => {
+router.delete('/:id', validateToken, (req, res) => {
   const { id } = req.params;
   const dataFile = readeFiles(NAME_FILE);
   const result = dataFile.filter((item) => item.id !== Number(id));
