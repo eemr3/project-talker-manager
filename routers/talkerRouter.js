@@ -24,8 +24,8 @@ router.get('/:id', (req, res) => {
   res.status(HTTP_OK_STATUS).json(result);
 });
 
-router.use(validateTokne, validateName, validateAge, validateTalk);
-router.post('/', (req, res) => {
+// router.use(validateTokne, validateName, validateAge, validateTalk,);
+router.post('/', validateTokne, validateName, validateAge, validateTalk, (req, res) => {
   const { name, age, talk, watchedAt, rate } = req.body;
   const talkers = readeFiles(NAME_FILE);
   talkers.push({ id: talkers.length + 1, name, age, talk, watchedAt, rate });
@@ -33,7 +33,7 @@ router.post('/', (req, res) => {
   return res.status(201).json({ id: talkers.length, name, age, talk, watchedAt, rate });
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validateTokne, validateName, validateAge, validateTalk, (req, res) => {
   const dataFile = readeFiles(NAME_FILE);
   const { id } = req.params;
   const { name, age, talk } = req.body;
@@ -41,6 +41,15 @@ router.put('/:id', (req, res) => {
   dataFile[result] = { name, age, id: Number(id), talk };
   createFiles(NAME_FILE, dataFile);
   return res.status(200).json({ name, age, id: Number(id), talk });
+});
+
+router.delete('/:id', validateTokne, (req, res) => {
+  const { id } = req.params;
+  const dataFile = readeFiles(NAME_FILE);
+  const result = dataFile.filter((item) => item.id !== Number(id));
+  createFiles(NAME_FILE, result);
+
+  return res.status(204).end();
 });
 
 module.exports = router;
