@@ -8,26 +8,39 @@ const { readeFiles, createFiles } = require('../services/fles');
 const HTTP_OK_STATUS = 200;
 const router = express.Router();
 
+const NAME_FILE = './talker.json';
+
 router.get('/', (req, res) => {
-  const dataFile = readeFiles('./talker.json');
+  const dataFile = readeFiles(NAME_FILE);
   if (dataFile.length > 0) return res.status(HTTP_OK_STATUS).json(dataFile);
   return res.status(HTTP_OK_STATUS).json([]);
 });
 
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  const dataFile = readeFiles('./talker.json');
+  const dataFile = readeFiles(NAME_FILE);
   const result = dataFile.find((item) => item.id === Number(id));
   if (!result) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
   res.status(HTTP_OK_STATUS).json(result);
 });
 
-router.post('/', validateTokne, validateName, validateAge, validateTalk, (req, res) => {
+router.use(validateTokne, validateName, validateAge, validateTalk);
+router.post('/', (req, res) => {
   const { name, age, talk, watchedAt, rate } = req.body;
-  const talkers = readeFiles('./talker.json');
+  const talkers = readeFiles(NAME_FILE);
   talkers.push({ id: talkers.length + 1, name, age, talk, watchedAt, rate });
-  createFiles('./talker.json', talkers);
+  createFiles(NAME_FILE, talkers);
   return res.status(201).json({ id: talkers.length, name, age, talk, watchedAt, rate });
+});
+
+router.put('/:id', (req, res) => {
+  const dataFile = readeFiles(NAME_FILE);
+  const { id } = req.params;
+  const { name, age, talk } = req.body;
+  const result = dataFile.findIndex((item) => item.id === Number(id));
+  dataFile[result] = { name, age, id: Number(id), talk };
+  createFiles(NAME_FILE, dataFile);
+  return res.status(200).json({ name, age, id: Number(id), talk });
 });
 
 module.exports = router;
